@@ -107,12 +107,14 @@ def skip_index(row: Tuple[Any], skip_index) -> Tuple[Any]:
 
 
 if __name__ == "__main__":
-    table = parse_table("../data/golf/golf.data")
+    table, labels = parse_table("../data/golf/golf.data"), ("Outlook", "Temperature", "Humidity", "Wind", "Play golf")
+    table, labels = parse_table("../data/cars/car.data"), (
+        "buying", "maint", "doors", "persons", "lug_boot", "safety", "class")
     print("\t".join(["Target", "Cnt", "%"]))
     for target, cnt, frac in get_target_distribution(table):
         print("\t".join([target, str(cnt), str(frac * 100)]))
     print("Total entropy", entropy(table))
     print("Total entropy for target", entropy([x[-1] for x in table]))
     print("max gain {} has index {}".format(*select_feature_index(table)))
-    tree = create_tree(table, labels=("Outlook", "Temperature", "Humidity", "Wind", "Play golf"))
+    tree = create_tree(table, labels=labels)
     print(tree.to_json(indent=2))
