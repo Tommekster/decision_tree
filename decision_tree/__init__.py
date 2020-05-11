@@ -1,5 +1,6 @@
 #! /usr/bin/env python3
 
+import math
 from typing import List, Tuple, Callable, Dict, Hashable
 
 
@@ -21,6 +22,16 @@ def get_target_distribution(table: List[Tuple[str]]):
     ]
 
 
+def entropy(rows: List[Hashable]):
+    groups = group_by(rows, lambda x: x)
+    total_count = len(rows)
+    probabilities = [
+        len(group) / total_count
+        for key, group in groups.items()
+    ]
+    return -sum(p * math.log2(p) for p in probabilities)
+
+
 def group_by(table: List[Tuple[str]], selector: Callable[[Tuple[str]], Hashable]) -> Dict[Hashable, List[Tuple[str]]]:
     groups = dict()
     for row in table:
@@ -34,4 +45,5 @@ if __name__ == "__main__":
     print("\t".join(["Target", "Cnt", "%"]))
     for target, cnt, frac in get_target_distribution(table):
         print("\t".join([target, str(cnt), str(frac * 100)]))
-    pass
+    print("Total entropy", entropy(table))
+    print("Total entropy", entropy([x[-1] for x in table]))
