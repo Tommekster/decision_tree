@@ -1,8 +1,9 @@
 #! /usr/bin/env python3
 
-import math
-from typing import List, Tuple, Callable, Dict, Hashable, Union
 import json
+import math
+from typing import List, Tuple, Callable, Dict, Hashable, Union, Any
+
 
 def parse_table(path: str, delimiter: str = ",") -> List[Tuple[str]]:
     def read_file():
@@ -49,10 +50,29 @@ def select_feature_index(table: List[Tuple[str]]) -> Tuple[int, float]:
     return sorted_gains[0]
 
 
-def create_tree(table: List[Tuple[str]]) -> Dict[int, Union[List[Tuple[str]], Dict]]:
+def create_tree(table: List[Tuple[str]], labels: Tuple[Union[str, int], ...] = None) -> Any:
+    labels = labels or tuple(range(len(table[0])))
+    if len(table[0]) == 1:
+        return ["{} ({})".format(key, len(vals)) for key, vals in group_by(table, lambda x: x[0]).items()]
     feature, gain = select_feature_index(table)
     groups = group_by(table, lambda x: x[feature])
-    return groups
+    label = labels[feature]
+    return [
+        ((label, key), create_tree(subselect_table(values, feature, key), skip_index(labels, feature)))
+        for key, values in groups.items()
+    ]
+
+
+def subselect_table(table: List[Tuple[str]], index, value):
+    return [
+        skip_index(row, index)
+        for row in table
+        if row[index] == value
+    ]
+
+
+def skip_index(row: Tuple[Any], skip_index) -> Tuple[Any]:
+    return tuple(v for n, v in enumerate(row) if n != skip_index)
 
 
 if __name__ == "__main__":
@@ -63,5 +83,5 @@ if __name__ == "__main__":
     print("Total entropy", entropy(table))
     print("Total entropy for target", entropy([x[-1] for x in table]))
     print("max gain {} has index {}".format(*select_feature_index(table)))
-    tree = create_tree(table)
-    print(json.dumps(tree, indent=4))
+    tree = create_tree(table, labels=("Outlook", "Temperature", "Humidity", "Wind", "Play golf"))
+    print(json.dumps(tree, indent=2))
