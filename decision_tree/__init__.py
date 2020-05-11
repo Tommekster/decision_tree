@@ -1,9 +1,9 @@
 #! /usr/bin/env python3
 
-import json
 import math
 from dataclasses import dataclass
 from typing import List, Tuple, Callable, Dict, Hashable, Union, Any
+
 from dataclasses_json import dataclass_json
 
 
@@ -76,10 +76,9 @@ def select_feature_index(table: List[Tuple[str]]) -> Tuple[int, float]:
 
 def create_tree(table: List[Tuple[str]], labels: Tuple[Union[str, int], ...] = None) -> Union[DecisionNode, Leaf]:
     labels = labels or tuple(range(len(table[0])))
-    if len(table[0]) == 1:
-        return [Leaf(value=key, count=len(vals)) for key, vals in group_by(table, lambda x: x[-1]).items()][0]
     feature, gain = select_feature_index(table)
-    # if gain == 0: return Leaf
+    if gain == 0:
+        return [Leaf(value=key, count=len(vals)) for key, vals in group_by(table, lambda x: x[-1]).items()][0]
     groups = group_by(table, lambda x: x[feature])
     label = labels[feature]
     return DecisionNode(
