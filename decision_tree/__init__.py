@@ -74,11 +74,13 @@ def select_feature_index(table: List[Tuple[str]]) -> Tuple[int, float]:
     return sorted_gains[0]
 
 
-def create_tree(table: List[Tuple[str]], labels: Tuple[Union[str, int], ...] = None) -> Union[DecisionNode, Leaf]:
+def create_tree(table: List[Tuple[str]], labels: Tuple[Union[str, int], ...] = None) -> Union[DecisionNode, List[Leaf]]:
     labels = labels or tuple(range(len(table[0])))
+    if len(labels) == 1:
+        raise RuntimeError
     feature, gain = select_feature_index(table)
-    if gain == 0:
-        return [Leaf(value=key, count=len(vals)) for key, vals in group_by(table, lambda x: x[-1]).items()][0]
+    if gain == 0 or len(labels) == 2:
+        return [Leaf(value=key, count=len(vals)) for key, vals in group_by(table, lambda x: x[-1]).items()]
     groups = group_by(table, lambda x: x[feature])
     label = labels[feature]
     return DecisionNode(
