@@ -2,7 +2,30 @@
 
 import json
 import math
+from dataclasses import dataclass
 from typing import List, Tuple, Callable, Dict, Hashable, Union, Any
+from dataclasses_json import dataclass_json
+
+
+@dataclass_json
+@dataclass(init=True, repr=True)
+class Leaf:
+    value: str
+    count: int
+
+
+@dataclass_json
+@dataclass(init=True, repr=True)
+class NodeBranch:
+    value: str
+    children: Union[List, Leaf]
+
+
+@dataclass_json
+@dataclass(init=True, repr=True)
+class DecisionNode:
+    label: Union[str, int]
+    branches: List
 
 
 def parse_table(path: str, delimiter: str = ",") -> List[Tuple[str]]:
@@ -33,7 +56,8 @@ def entropy(rows: List[Hashable]):
     return -sum(p * math.log2(p) for p in probabilities)
 
 
-def group_by(table: List[Tuple[str]], selector: Callable[[Tuple[str]], Hashable]) -> Dict[Hashable, List[Tuple[str]]]:
+def group_by(table: List[Tuple[str]], selector: Callable[[Tuple[str]], Hashable]) -> Dict[
+    Union[str, Tuple[str]], List[Tuple[str]]]:
     groups = dict()
     for row in table:
         target = selector(row)
@@ -50,17 +74,23 @@ def select_feature_index(table: List[Tuple[str]]) -> Tuple[int, float]:
     return sorted_gains[0]
 
 
-def create_tree(table: List[Tuple[str]], labels: Tuple[Union[str, int], ...] = None) -> Any:
+def create_tree(table: List[Tuple[str]], labels: Tuple[Union[str, int], ...] = None) -> Union[DecisionNode, Leaf]:
     labels = labels or tuple(range(len(table[0])))
     if len(table[0]) == 1:
-        return ["{} ({})".format(key, len(vals)) for key, vals in group_by(table, lambda x: x[0]).items()]
+        return [Leaf(value=key, count=len(vals)) for key, vals in group_by(table, lambda x: x[-1]).items()][0]
     feature, gain = select_feature_index(table)
+    # if gain == 0: return Leaf
     groups = group_by(table, lambda x: x[feature])
     label = labels[feature]
-    return [
-        ((label, key), create_tree(subselect_table(values, feature, key), skip_index(labels, feature)))
-        for key, values in groups.items()
-    ]
+    return DecisionNode(
+        label=label,
+        branches=[
+            NodeBranch(
+                value=key,
+                children=create_tree(subselect_table(values, feature, key), skip_index(labels, feature))
+            )
+            for key, values in groups.items()
+        ])
 
 
 def subselect_table(table: List[Tuple[str]], index, value):
@@ -84,4 +114,4 @@ if __name__ == "__main__":
     print("Total entropy for target", entropy([x[-1] for x in table]))
     print("max gain {} has index {}".format(*select_feature_index(table)))
     tree = create_tree(table, labels=("Outlook", "Temperature", "Humidity", "Wind", "Play golf"))
-    print(json.dumps(tree, indent=2))
+    print(tree.to_json(indent=2))
