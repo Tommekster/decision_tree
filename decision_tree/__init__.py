@@ -1,8 +1,8 @@
 #! /usr/bin/env python3
 
 import math
-from typing import List, Tuple, Callable, Dict, Hashable
-
+from typing import List, Tuple, Callable, Dict, Hashable, Union
+import json
 
 def parse_table(path: str, delimiter: str = ",") -> List[Tuple[str]]:
     def read_file():
@@ -44,9 +44,15 @@ def select_feature_index(table: List[Tuple[str]]) -> Tuple[int, float]:
     marginal_entropies = [entropy([x[n] for x in table]) for n, _ in enumerate(table[0])]
     joint_entropies = [entropy([(x[n], x[-1]) for x in table]) for n, _ in enumerate(table[0])]
     conditional_entropies = [H_x_y - H_y for H_x_y, H_y in zip(joint_entropies, marginal_entropies)]
-    information_gains = [marginals[-1] - H_xIy for H_xIy in conditional_entropies]
+    information_gains = [marginal_entropies[-1] - H_xIy for H_xIy in conditional_entropies]
     sorted_gains = sorted(enumerate(information_gains[:-1]), key=lambda x: x[1], reverse=True)
     return sorted_gains[0]
+
+
+def create_tree(table: List[Tuple[str]]) -> Dict[int, Union[List[Tuple[str]], Dict]]:
+    feature, gain = select_feature_index(table)
+    groups = group_by(table, lambda x: x[feature])
+    return groups
 
 
 if __name__ == "__main__":
@@ -55,18 +61,7 @@ if __name__ == "__main__":
     for target, cnt, frac in get_target_distribution(table):
         print("\t".join([target, str(cnt), str(frac * 100)]))
     print("Total entropy", entropy(table))
-    print("Total entropy", entropy([x[-1] for x in table]))
-
-    marginals = [entropy([x[n] for x in table]) for n, _ in enumerate(table[0])]
-    print("Marginal entropies", *marginals)
-
-    joins = [entropy([(x[n], x[-1]) for x in table]) for n, _ in enumerate(table[0])]
-    print("Joint entropies", *joins)
-
-    conditionals = [H_x_y - H_y for H_x_y, H_y in zip(joins, marginals)]
-    print("conditionals", *conditionals)
-
-    gains = [marginals[-1] - H_xIy for H_xIy in conditionals]
-    print("gains", *gains)
-
+    print("Total entropy for target", entropy([x[-1] for x in table]))
     print("max gain {} has index {}".format(*select_feature_index(table)))
+    tree = create_tree(table)
+    print(json.dumps(tree, indent=4))
