@@ -47,3 +47,15 @@ if __name__ == "__main__":
         print("\t".join([target, str(cnt), str(frac * 100)]))
     print("Total entropy", entropy(table))
     print("Total entropy", entropy([x[-1] for x in table]))
+
+    marginals = [entropy([x[n] for x in table]) for n,_ in enumerate(table[0])]
+    print("Marginal entropies", *marginals)
+
+    joins = [entropy([(x[n],x[-1]) for x in table]) for n,_ in enumerate(table[0])]
+    print("Joint entropies", *joins)
+
+    conditionals = [H_x_y - H_y for H_x_y, H_y in zip(joins, marginals)]
+    print("conditionals", *conditionals)
+
+    gains = [marginals[-1] - H_xIy for H_xIy in conditionals]
+    print("gains", *gains)
