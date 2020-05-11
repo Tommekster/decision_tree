@@ -117,4 +117,6 @@ if __name__ == "__main__":
     print("Total entropy for target", entropy([x[-1] for x in table]))
     print("max gain {} has index {}".format(*select_feature_index(table)))
     tree = create_tree(table, labels=labels)
+    with open("output.json", "w") as f:
+        f.write(tree.to_json() + "\n")
     print(tree.to_json(indent=2))
