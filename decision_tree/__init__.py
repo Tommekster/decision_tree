@@ -28,13 +28,16 @@ class DecisionNode:
     branches: List
 
 
-def parse_table(path: str, delimiter: str = ",") -> List[Tuple[str]]:
+def parse_table(path: str, labels: Tuple[Union[int, str], ...] = None, delimiter: str = ",") \
+        -> Tuple[List[Tuple[str]], Tuple[Union[int, str], ...]]:
     def read_file():
         with open(path, "r") as f:
             for line in f:
                 yield tuple(x.strip() for x in line.split(delimiter))
 
-    return list(read_file())
+    table = list(read_file())
+    labels = labels or tuple(n for n, _ in enumerate(table[0]))
+    return table, labels
 
 
 def get_target_distribution(table: List[Tuple[str]]):
@@ -46,7 +49,7 @@ def get_target_distribution(table: List[Tuple[str]]):
     ]
 
 
-def entropy(rows: List[Hashable]):
+def entropy(rows: List[Hashable]) -> float:
     groups = group_by(rows, lambda x: x)
     total_count = len(rows)
     probabilities = [
@@ -56,8 +59,8 @@ def entropy(rows: List[Hashable]):
     return -sum(p * math.log2(p) for p in probabilities)
 
 
-def group_by(table: List[Tuple[str]], selector: Callable[[Tuple[str]], Hashable]) -> Dict[
-    Union[str, Tuple[str]], List[Tuple[str]]]:
+def group_by(table: List[Hashable], selector: Callable[[Union[Hashable, Tuple[str]]], Hashable]) \
+        -> Dict[Union[str, Tuple[str]], List[Tuple[str]]]:
     groups = dict()
     for row in table:
         target = selector(row)
@@ -107,9 +110,9 @@ def skip_index(row: Tuple[Any], skip_index) -> Tuple[Any]:
 
 
 if __name__ == "__main__":
-    table, labels = parse_table("../data/golf/golf.data"), ("Outlook", "Temperature", "Humidity", "Wind", "Play golf")
-    table, labels = parse_table("../data/cars/car.data"), (
-        "buying", "maint", "doors", "persons", "lug_boot", "safety", "class")
+    table, labels = parse_table("../data/cars/car.data",
+                                ("buying", "maint", "doors", "persons", "lug_boot", "safety", "class"))
+    # table, labels = parse_table("../data/golf/golf.data", ("Outlook", "Temperature", "Humidity", "Wind", "Play golf"))
     print("\t".join(["Target", "Cnt", "%"]))
     for target, cnt, frac in get_target_distribution(table):
         print("\t".join([target, str(cnt), str(frac * 100)]))
