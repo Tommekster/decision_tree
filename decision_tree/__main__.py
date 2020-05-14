@@ -2,9 +2,9 @@
 
 from typing import List, Tuple, Union
 
+from . import entropy
 from . import table_repository
 from .decision_tree_generator import DecisionTreeGenerator
-from .entropy import shannon_entropy
 from .group_by import group_by
 
 
@@ -30,13 +30,13 @@ def load_cars() -> Tuple[List[Tuple[str]], Tuple[Union[int, str], ...]]:
 
 
 if __name__ == "__main__":
-    generator = DecisionTreeGenerator()
+    generator = DecisionTreeGenerator(entropy.shannon_entropy)
     table, labels = load_cars()
     print("\t".join(["Target", "Cnt", "%"]))
     for target, cnt, frac in get_target_distribution(table):
         print("\t".join([target, str(cnt), str(frac * 100)]))
-    print("Total entropy", shannon_entropy(table))
-    print("Total entropy for target", shannon_entropy([x[-1] for x in table]))
+    print("Total entropy", entropy.shannon_entropy(table))
+    print("Total entropy for target", entropy.shannon_entropy([x[-1] for x in table]))
     print("max gain {} has index {}".format(*generator.select_feature_index(table)))
     tree = generator.create_tree(table, labels=labels)
     with open("output.json", "w") as f:

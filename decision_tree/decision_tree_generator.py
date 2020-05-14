@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-from typing import List, Tuple, Union, Any
+from typing import List, Tuple, Union, Any, Callable, Hashable
 
 from .entropy import shannon_entropy
 from .group_by import group_by
@@ -8,6 +8,11 @@ from .models import Leaf, NodeBranch, DecisionNode
 
 
 class DecisionTreeGenerator:
+    entropy: Callable[[List[Hashable]], float]
+
+    def __init__(self, entropy: Callable[[List[Hashable]], float]):
+        self.entropy = entropy
+
     def create_tree(self, table: List[Tuple[str]], labels: Tuple[Union[str, int], ...] = None) \
             -> Union[DecisionNode, List[Leaf]]:
         labels = labels or tuple(range(len(table[0])))
@@ -25,7 +30,8 @@ class DecisionTreeGenerator:
                     value=key,
                     children=self.create_tree(
                         self.__subselect_table__(values, feature, key),
-                        self.__skip_index__(labels, feature))
+                        self.__skip_index__(labels, feature)
+                    )
                 )
                 for key, values in groups.items()
             ])
