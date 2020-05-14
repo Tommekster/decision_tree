@@ -1,1 +1,2 @@
-dataclasses-json==0.4.2
+dataclasses-json>=0.4.2
+graphviz>=0.14
