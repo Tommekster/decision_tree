@@ -2,13 +2,15 @@
 
 from typing import List, Tuple, Union
 
+import blockdiag.command
 import graphviz
 
 from . import entropy
 from . import table_repository
 from .decision_tree_generator import DecisionTreeGenerator
 from .group_by import group_by
-from .models import DecisionNode, Leaf, NodeBranch
+from .models import DecisionNode, Leaf
+
 
 def get_target_distribution(table: List[Tuple[str]]):
     groups = group_by(table, lambda x: x[-1])
@@ -43,25 +45,27 @@ def export_graph(tree: Union[DecisionNode, List[Leaf]]) -> str:
 
     def add_node(node, node_index):
         if isinstance(node, DecisionNode):
-            graph.node(node_index, node.label)
+            graph.node(str(node_index), node.label)
             for branch in node.branches:
                 if isinstance(branch.children, DecisionNode):
                     child_index = get_index()
                     add_node(branch.children, child_index)
-                    graph.edge(node_index, child_index, label=branch.value)
+                    graph.edge(str(node_index), str(child_index), label=branch.value)
                 elif isinstance(branch.children, list):
                     for child in branch.children:
                         child_index = get_index()
                         add_node(child, child_index)
-                        graph.edge(node_index, child_index, label=branch.value)
+                        graph.edge(str(node_index), str(child_index), label=branch.value)
                 else:
                     raise NotImplementedError
         elif isinstance(node, Leaf):
-            graph.node(node_index, "{}\n({})".format(node.value, node.count))
+            graph.node(str(node_index), "{}\n({})".format(node.value, node.count))
         else:
             raise NotImplementedError
 
-    return graph.render(format="png")
+    add_node(tree, get_index())
+
+    return graph.source
 
 
 if __name__ == "__main__":
@@ -77,5 +81,7 @@ if __name__ == "__main__":
 
     with open("output.json", "w") as f:
         f.write(tree.to_json() + "\n")
-    print(export_graph(tree))
-    print(tree.to_json(indent=2))
+    with open("diag.diag", "w") as f:
+        f.write(export_graph(tree).replace("digraph", "blockdiag"))
+    blockdiag.command.main(["diag.diag"])
+    # print(tree.to_json(indent=2))
