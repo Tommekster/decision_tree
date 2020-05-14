@@ -2,8 +2,8 @@
 
 from typing import List, Tuple, Union
 
-from . import decision_tree_generator as generator
 from . import table_repository
+from .decision_tree_generator import DecisionTreeGenerator
 from .entropy import entropy
 from .group_by import group_by
 
@@ -30,6 +30,7 @@ def load_cars() -> Tuple[List[Tuple[str]], Tuple[Union[int, str], ...]]:
 
 
 if __name__ == "__main__":
+    generator = DecisionTreeGenerator()
     table, labels = load_cars()
     print("\t".join(["Target", "Cnt", "%"]))
     for target, cnt, frac in get_target_distribution(table):
