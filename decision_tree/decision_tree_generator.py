@@ -2,7 +2,7 @@
 
 from typing import List, Tuple, Union, Any
 
-from .entropy import entropy
+from .entropy import shannon_entropy
 from .group_by import group_by
 from .models import Leaf, NodeBranch, DecisionNode
 
@@ -32,8 +32,8 @@ class DecisionTreeGenerator:
 
     @staticmethod
     def select_feature_index(table: List[Tuple[str]]) -> Tuple[int, float]:
-        marginal_entropies = [entropy([x[n] for x in table]) for n, _ in enumerate(table[0])]
-        joint_entropies = [entropy([(x[n], x[-1]) for x in table]) for n, _ in enumerate(table[0])]
+        marginal_entropies = [shannon_entropy([x[n] for x in table]) for n, _ in enumerate(table[0])]
+        joint_entropies = [shannon_entropy([(x[n], x[-1]) for x in table]) for n, _ in enumerate(table[0])]
         conditional_entropies = [H_x_y - H_y for H_x_y, H_y in zip(joint_entropies, marginal_entropies)]
         information_gains = [marginal_entropies[-1] - H_xIy for H_xIy in conditional_entropies]
         sorted_gains = sorted(enumerate(information_gains[:-1]), key=lambda x: x[1], reverse=True)

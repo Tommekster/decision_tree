@@ -6,7 +6,7 @@ from typing import List, Hashable
 from .group_by import group_by
 
 
-def entropy(rows: List[Hashable]) -> float:
+def shannon_entropy(rows: List[Hashable]) -> float:
     groups = group_by(rows, lambda x: x)
     total_count = len(rows)
     probabilities = [
