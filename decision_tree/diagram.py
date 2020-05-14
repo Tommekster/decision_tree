@@ -19,7 +19,7 @@ def create_graph(tree: Union[DecisionNode, List[Leaf]]) -> str:
 
     def add_node(node, node_index):
         if isinstance(node, DecisionNode):
-            graph.node(str(node_index), node.label)
+            graph.node(str(node_index), "{}\\n{}".format(node.label, node.gain))
             for branch in node.branches:
                 if isinstance(branch.children, DecisionNode):
                     child_index = get_index()

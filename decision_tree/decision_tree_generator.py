@@ -24,6 +24,7 @@ class DecisionTreeGenerator:
         label = labels[feature]
         return DecisionNode(
             label=label,
+            gain=gain,
             branches=[
                 NodeBranch(
                     value=key,

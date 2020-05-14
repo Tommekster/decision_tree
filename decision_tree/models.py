@@ -24,4 +24,5 @@ class NodeBranch:
 @dataclass(init=True, repr=True)
 class DecisionNode:
     label: Union[str, int]
+    gain: float
     branches: List[NodeBranch]
