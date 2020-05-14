@@ -32,22 +32,13 @@ def load_cars() -> Tuple[List[Tuple[str]], Tuple[Union[int, str], ...]]:
     )
 
 
-if __name__ == "__main__":
-    table, labels = load_golf()
-    print("\t".join(["Target", "Cnt", "%"]))
-    for target, cnt, frac in get_target_distribution(table):
-        print("\t".join([target, str(cnt), str(frac * 100)]))
-
-    json_results = False
-    diagram_results = True
-
-    alphas = [0.0, 0.5, 1.0, 2.0, float("inf")]
-    results = {}
+def generate_trees(alphas: List[float], results: dict, json_results: bool, diagram_results: bool):
     for alpha in alphas:
         generator = DecisionTreeGenerator(lambda x: entropy.renyi_entropy(x, alpha))
         print("Total entropy", generator.entropy(table))
         print("Total entropy for target", generator.entropy([x[-1] for x in table]))
         print("max gain {} has index {}".format(*generator.select_feature_index(table)))
+        print("")
 
         tree = generator.create_tree(table, labels=labels)
         results[alpha] = tree.to_json()
@@ -59,3 +50,24 @@ if __name__ == "__main__":
             diagram_file = "diagram{}.png".format(alpha)
             graph = diagram.create_graph(tree)
             diagram.save_graph(graph, diagram_file)
+
+
+def compare_results(alphas: List[float], results: dict):
+    header = "\t".join([""] + [str(a) for a in alphas])
+    print(header)
+    for x in alphas:
+        print("\t".join([str(x)] + ["=" if results[x] == results[y] else " " for y in alphas]))
+
+
+if __name__ == "__main__":
+    table, labels = load_golf()
+    print("\t".join(["Target", "Cnt", "%"]))
+    for target, cnt, frac in get_target_distribution(table):
+        print("\t".join([target, str(cnt), str(frac * 100)]))
+    print("")
+
+    alphas = [0.0, 0.5, 1.0, 2.0, float("inf")]
+    results = {}
+
+    generate_trees(alphas, results, json_results=False, diagram_results=True)
+    compare_results(alphas, results)
