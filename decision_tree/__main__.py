@@ -1,12 +1,13 @@
 #! /usr/bin/env python3
 
-from typing import List, Tuple, Union
+from typing import List, Tuple, Union, Dict
 
 from . import diagram
 from . import entropy
 from . import table_repository
 from .decision_tree_generator import DecisionTreeGenerator
 from .group_by import group_by
+from .models import DecisionNode
 
 
 def get_target_distribution(table: List[Tuple[str]]):
@@ -42,7 +43,7 @@ def generate_trees(alphas: List[float], results: dict, json_results: bool, diagr
         print("")
 
         tree = generator.create_tree(table, labels=labels)
-        results[alpha] = tree.to_json()
+        results[alpha] = tree
         if json_results:
             with open("output_{}.json".format(alpha), "w") as f:
                 f.write(results[alpha] + "\n")
@@ -53,7 +54,7 @@ def generate_trees(alphas: List[float], results: dict, json_results: bool, diagr
             diagram.save_graph(graph, diagram_file)
 
 
-def compare_results(alphas: List[float], results: dict):
+def compare_trees(alphas: List[float], results: dict):
     header = "\t".join([""] + [str(a) for a in alphas])
     print(header)
     for x in alphas:
@@ -67,8 +68,8 @@ if __name__ == "__main__":
         print("\t".join([target, str(cnt), str(frac * 100)]))
     print("")
 
-    alphas = [0.0, 0.5, 1.0, 2.0, 99, float("inf")]
-    results = {}
+    alphas: List[float] = [0.0, 0.5, 1.0, 2.0, 99, float("inf")]
+    results: Dict[float, DecisionNode] = {}
 
     generate_trees(alphas, results, json_results=False, diagram_results=True)
-    compare_results(alphas, results)
+    compare_trees(alphas, results)
