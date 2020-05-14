@@ -35,9 +35,10 @@ def load_cars() -> Tuple[List[Tuple[str]], Tuple[Union[int, str], ...]]:
 def generate_trees(alphas: List[float], results: dict, json_results: bool, diagram_results: bool):
     for alpha in alphas:
         generator = DecisionTreeGenerator(lambda x: entropy.renyi_entropy(x, alpha))
+        print("alpha =", alpha)
         print("Total entropy", generator.entropy(table))
         print("Total entropy for target", generator.entropy([x[-1] for x in table]))
-        print("max gain {} has index {}".format(*generator.select_feature_index(table)))
+        print("first max gain {1} has index {0}".format(*generator.select_feature_index(table)))
         print("")
 
         tree = generator.create_tree(table, labels=labels)
@@ -66,7 +67,7 @@ if __name__ == "__main__":
         print("\t".join([target, str(cnt), str(frac * 100)]))
     print("")
 
-    alphas = [0.0, 0.5, 1.0, 2.0, float("inf")]
+    alphas = [0.0, 0.5, 1.0, 2.0, 99, float("inf")]
     results = {}
 
     generate_trees(alphas, results, json_results=False, diagram_results=True)
