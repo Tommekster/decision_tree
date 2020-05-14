@@ -52,14 +52,17 @@ def export_graph(tree: Union[DecisionNode, List[Leaf]]) -> str:
                     add_node(branch.children, child_index)
                     graph.edge(str(node_index), str(child_index), label=branch.value)
                 elif isinstance(branch.children, list):
-                    for child in branch.children:
-                        child_index = get_index()
-                        add_node(child, child_index)
-                        graph.edge(str(node_index), str(child_index), label=branch.value)
+                    child_index = get_index()
+                    graph.node(
+                        str(child_index),
+                        "\\n".join(
+                            "{} ({})".format(child.value, child.count)
+                            for child in branch.children
+                        )
+                    )
+                    graph.edge(str(node_index), str(child_index), label=branch.value)
                 else:
                     raise NotImplementedError
-        elif isinstance(node, Leaf):
-            graph.node(str(node_index), "{}\n({})".format(node.value, node.count))
         else:
             raise NotImplementedError
 
@@ -70,7 +73,7 @@ def export_graph(tree: Union[DecisionNode, List[Leaf]]) -> str:
 
 if __name__ == "__main__":
     generator = DecisionTreeGenerator(entropy.shannon_entropy)
-    table, labels = load_cars()
+    table, labels = load_golf()
     print("\t".join(["Target", "Cnt", "%"]))
     for target, cnt, frac in get_target_distribution(table):
         print("\t".join([target, str(cnt), str(frac * 100)]))
