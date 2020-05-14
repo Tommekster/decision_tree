@@ -1,4 +1,5 @@
 #! /usr/bin/env python3
+import os
 import tempfile
 from typing import List, Union
 
@@ -45,7 +46,8 @@ def create_graph(tree: Union[DecisionNode, List[Leaf]]) -> str:
 
 
 def save_graph(graph: str, output_file: str) -> None:
-    with tempfile.NamedTemporaryFile() as temp_file:
-        temp_file.write(graph)
-        temp_file.close()
-        blockdiag.command.main(["-o", output_file, temp_file.name])
+    with tempfile.TemporaryDirectory() as temp:
+        temp_file = os.path.join(temp, "diagram.diag")
+        with open(temp_file, "w") as f:
+            f.write(graph)
+        blockdiag.command.main(["-o", output_file, temp_file])
