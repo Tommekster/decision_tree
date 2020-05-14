@@ -1,0 +1,43 @@
+Target	Cnt	%
+unacc	1210	70.02314814814815
+acc	384	22.22222222222222
+vgood	65	3.761574074074074
+good	69	3.9930555555555554
+
+alpha = 0.0
+Total entropy 10.754887502163468
+Total entropy for target 10.754887502163468
+first max gain 0 has index 10.754887502163468
+
+alpha = 0.5
+Total entropy 10.754887502163552
+Total entropy for target 1.5344230216597239
+first max gain 5 has index 0.3907591560876995
+
+alpha = 1.0
+Total entropy 10.754887502163289
+Total entropy for target 1.2057409700121753
+first max gain 5 has index 0.26218435655426364
+
+alpha = 2.0
+Total entropy 10.754887502163502
+Total entropy for target 0.881730023167432
+first max gain 5 has index 0.19093031909254565
+
+alpha = 99
+Total entropy 10.75488087711369
+Total entropy for target 0.5193420492872414
+first max gain 3 has index 0.5031689625451885
+
+alpha = inf
+Total entropy 10.754887502163468
+Total entropy for target 0.5140961700015116
+first max gain 3 has index 0.5140961700015116
+
+	0.0	0.5	1.0	2.0	99	inf
+0.0	=	 	 	 	 	 
+0.5	 	=	=	 	 	 
+1.0	 	=	=	 	 	 
+2.0	 	 	 	=	 	 
+99	 	 	 	 	=	 
+inf	 	 	 	 	 	=
